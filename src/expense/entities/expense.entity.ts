@@ -10,6 +10,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { ExpenseMembers } from './expense-members.entity';
+import { Category } from 'src/category/entities/category.entity';
 
 @Entity('expense')
 export class Expense {
@@ -36,6 +37,9 @@ export class Expense {
 
   @ManyToOne(()=>User, user=> user.createdExpenses)
   createdBy: User
+
+  @ManyToOne(()=>Category, categories => categories.expenses)
+  category: Category
 
   @CreateDateColumn()
   createdAt: Date;

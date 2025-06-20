@@ -13,6 +13,7 @@ import { GroupMember } from 'src/group/entities/group-member.entity';
 import { Group } from 'src/group/entities/group.entity';
 import { Expense } from 'src/expense/entities/expense.entity';
 import { ExpenseMembers } from 'src/expense/entities/expense-members.entity';
+import { Notifications } from 'src/notification/entities/notification.entity';
 
 @Entity('users')
 export class User {
@@ -40,14 +41,17 @@ export class User {
   @Column({ type: 'varchar',  nullable: true })
   refreshToken: string;
 
-  @OneToMany(()=>GroupMember, member=> member.group)
-  groupMember: Group[]
+  @OneToMany(()=>GroupMember, member=> member.user)
+  groupMember: GroupMember[]
 
   @OneToMany(() => Expense, expense => expense.createdBy)
   createdExpenses: Expense[]
 
   @OneToMany(()=>ExpenseMembers, expenseMember => expenseMember.user)
   expenseMembers: ExpenseMembers[]
+
+  @OneToMany(()=>Notifications, notification => notification.user)
+  notifications: Notifications[]
 
   @CreateDateColumn()
   createdAt: Date;
