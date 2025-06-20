@@ -50,7 +50,7 @@ export class User {
   expenseMembers: ExpenseMembers[]
 
   @OneToMany(()=>Notifications, notification => notification.user)
-  notifications: Notifications[]
+  notifications: Notifications[] //
 
   @CreateDateColumn()
   createdAt: Date;
