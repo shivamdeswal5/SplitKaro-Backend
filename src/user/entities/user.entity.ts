@@ -6,8 +6,11 @@ import {
   UpdateDateColumn,
   BeforeInsert,
   BeforeUpdate,
+  OneToMany,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { GroupMember } from 'src/group/entities/group-member.entity';
+import { Group } from 'src/group/entities/group.entity';
 
 @Entity('users')
 export class User {
@@ -34,6 +37,9 @@ export class User {
 
   @Column({ type: 'varchar',  nullable: true })
   refreshToken: string;
+
+  @OneToMany(()=>GroupMember, member=> member.group)
+  groupMember: Group[]
 
   @CreateDateColumn()
   createdAt: Date;
