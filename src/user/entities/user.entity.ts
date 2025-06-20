@@ -1,19 +1,18 @@
+import * as bcrypt from 'bcrypt';
+import { ExpenseMembers } from 'src/expense/entities/expense-members.entity';
+import { Expense } from 'src/expense/entities/expense.entity';
+import { GroupMember } from 'src/group/entities/group-member.entity';
+import { Notifications } from 'src/notification/entities/notification.entity';
 import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
   BeforeInsert,
   BeforeUpdate,
+  Column,
+  CreateDateColumn,
+  Entity,
   OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { GroupMember } from 'src/group/entities/group-member.entity';
-import { Group } from 'src/group/entities/group.entity';
-import { Expense } from 'src/expense/entities/expense.entity';
-import { ExpenseMembers } from 'src/expense/entities/expense-members.entity';
-import { Notifications } from 'src/notification/entities/notification.entity';
 
 @Entity('users')
 export class User {
