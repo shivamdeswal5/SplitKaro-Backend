@@ -11,6 +11,8 @@ import {
 import * as bcrypt from 'bcrypt';
 import { GroupMember } from 'src/group/entities/group-member.entity';
 import { Group } from 'src/group/entities/group.entity';
+import { Expense } from 'src/expense/entities/expense.entity';
+import { ExpenseMembers } from 'src/expense/entities/expense-members.entity';
 
 @Entity('users')
 export class User {
@@ -40,6 +42,12 @@ export class User {
 
   @OneToMany(()=>GroupMember, member=> member.group)
   groupMember: Group[]
+
+  @OneToMany(() => Expense, expense => expense.createdBy)
+  createdExpenses: Expense[]
+
+  @OneToMany(()=>ExpenseMembers, expenseMember => expenseMember.user)
+  expenseMembers: ExpenseMembers[]
 
   @CreateDateColumn()
   createdAt: Date;
