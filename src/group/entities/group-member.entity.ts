@@ -14,9 +14,6 @@ export class GroupMember {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  name: string
-
   @ManyToOne(()=> Group, group => group.members,{cascade:true})
   group: Group
 

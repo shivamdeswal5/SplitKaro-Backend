@@ -1,20 +1,23 @@
 import {
     ArrayMinSize,
     IsArray,
+  IsOptional,
   IsString,
+  ValidateNested,
 } from 'class-validator';
 
 export class UpdateGroupDto {
 
+  @IsOptional()
   @IsString({ message: 'Group Name Must Be String'})
-  name: string;
+  name?: string;
 
+  @IsOptional()
   @IsArray()
-  @ArrayMinSize(1,{message:"Provide Atleast One User Id To Update Group: "})
-  addUsersIds: string[];
+  addUsersIds?: string[];
 
+  @IsOptional()
   @IsArray()
-  @ArrayMinSize(1,{message:"Provide Atleast One User Id To Remove User From Group: "})
-  removeUsersIds: string[];
+  removeUsersIds?: string[];
   
 } 

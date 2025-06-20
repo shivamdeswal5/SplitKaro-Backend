@@ -23,7 +23,7 @@ export class GroupService {
     }
 
     async getAllGroups(): Promise<Group[]>{
-        return this.groupRepository.find();
+        return this.groupRepository.find({relations:['members']});
     }
 
     async addUserToGroup(dto:AddUserToGroupDto): Promise<GroupMember>{
@@ -38,7 +38,7 @@ export class GroupService {
             console.log(`User with Id: ${userId} not found ...`);
             throw new NotFoundException(`User with Id: ${userId} not found ...`);
         }
-        const exists = await this.groupMemberRepository.find(
+        const exists = await this.groupMemberRepository.findOne(
             {
                 where: {
                     group:{id:groupId},
@@ -46,6 +46,7 @@ export class GroupService {
                 }
             }
         )
+        console.log("Existing GroupMembers: ",exists);
         if(exists){
             console.log("User Already In Same Group ...");
             throw new BadRequestException('User Already present In Group');
@@ -58,7 +59,7 @@ export class GroupService {
         
     }   
 
-    async removeUserFromGroup(dto:RemoveUserFromGroupDto): Promise<string> {
+    async removeUserFromGroup(dto:RemoveUserFromGroupDto): Promise<{ message: string }> {
         const {userId, groupId} = dto;
         const group = await this.groupRepository.findOne({where: {id:groupId}});
         if(!group){
@@ -70,14 +71,15 @@ export class GroupService {
             console.log(`User with Id: ${userId} not found ...`);
             throw new NotFoundException(`User with Id: ${userId} not found ...`);
         }
-        const member = await this.groupMemberRepository.find(
+        const member = await this.groupMemberRepository.findOne(
             {
                 where: {
-                    group:{id:groupId},
-                    user: {id:userId}
+                    group:{id:group.id},
+                    user: {id:user.id}
                 }
             }
         )
+        console.log("Member: ",member)
         if(!member){
             console.log("User Doesnt Exists in Group ...");
             throw new BadRequestException('User Not Present In group');
@@ -85,18 +87,21 @@ export class GroupService {
 
         await this.groupMemberRepository.remove(member);
 
-        return `User With Id: ${userId} has been remove from group with Id: ${groupId}`
+        return {
+            message: `User With Id: ${userId} has been remove from group with Id: ${groupId}`
+        }
     }
 
     async getGroupsForUser(userId: string): Promise<Group[]>{
+        console.log("User Id:",userId);
         const membership = await this.groupMemberRepository.find(
             {
-                where: {id:userId},
+                where: {user:{id:userId}},
                 relations:['group']
             }
         )
         console.log("Memberships: ",membership);
-        const groups = membership.map(members => members.group);
+        const groups = membership.map(member => member.group);
         console.log("Groups in which user is present: ",groups);
         return groups;
     }
@@ -110,10 +115,17 @@ export class GroupService {
             console.log(`Group with Id: ${group} not found ..`);
             throw new NotFoundException('Group with Id: ${group} not found ..')
         }
+        console.log("Current Group: ",group.name);
+        console.log("Updated Group Name",dto.name);
 
-        if (group.name === dto.name){
+        if (group.name == dto.name){
             console.log('Group name to be updated is same as current name please choose new name');
             throw new BadRequestException(`Current Group name and Update Group Name Is Same`);
+        }
+        if (dto.name !== undefined) {
+            group.name = dto.name;
+        } else {
+            throw new BadRequestException('Group name is required');
         }
 
         if(dto.addUsersIds && dto.addUsersIds.length >0){
@@ -124,7 +136,7 @@ export class GroupService {
                     throw new NotFoundException(`User With Id: ${userId}`);
                 }
 
-                const exists = await this.groupMemberRepository.find(
+                const exists = await this.groupMemberRepository.findOne(
                     {
                         where:{
                             user:{id:user.id},
@@ -132,6 +144,7 @@ export class GroupService {
                         }
                     }
                 )
+                console.log("Exists: ",exists);
                 if(!exists){
                     const groupMember = this.groupMemberRepository.create({
                         group,

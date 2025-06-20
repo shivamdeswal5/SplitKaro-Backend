@@ -10,6 +10,11 @@ export class UserController {
         private readonly userService: UserService
     ) { }
 
+    @Get()
+    getUsers(){
+        return this.userService.getAllUsers();
+    }
+
     @Patch('profile')
     @UseInterceptors(FileInterceptor('file'))
     updateProfile(
