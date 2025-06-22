@@ -1,8 +1,4 @@
 import * as bcrypt from 'bcrypt';
-import { ExpenseMembers } from 'src/expense/entities/expense-members.entity';
-import { Expense } from 'src/expense/entities/expense.entity';
-import { GroupMember } from 'src/group/entities/group-member.entity';
-import { Notifications } from 'src/notification/entities/notification.entity';
 import {
   BeforeInsert,
   BeforeUpdate,
@@ -13,6 +9,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { GroupMember } from 'src/group/entities/group-member.entity';
+import { Expense } from 'src/expense/entities/expense.entity';
+import { ExpenseMembers } from 'src/expense/entities/expense-members.entity';
+import { Notification } from 'src/notification/entities/notification.entity';
+import { Settlement } from 'src/settlement/entities/settlement.entity';
 
 @Entity('users')
 export class User {
@@ -31,26 +32,32 @@ export class User {
   @Column()
   lastName: string;
 
-  @Column({default:'unverified'})
+  @Column({ default: 'unverified' })
   accountStatus: 'verified' | 'unverified';
 
-  @Column({ type: 'varchar',  nullable: true })
+  @Column({ nullable: true })
   profileImg: string;
 
-  @Column({ type: 'varchar',  nullable: true })
+  @Column({ nullable: true })
   refreshToken: string;
 
-  @OneToMany(()=>GroupMember, member=> member.user)
-  groupMember: GroupMember[]
+  @OneToMany(() => GroupMember, member => member.user)
+  groupMember: GroupMember[];
 
   @OneToMany(() => Expense, expense => expense.createdBy)
-  createdExpenses: Expense[]
+  createdExpenses: Expense[];
 
-  @OneToMany(()=>ExpenseMembers, expenseMember => expenseMember.user)
-  expenseMembers: ExpenseMembers[]
+  @OneToMany(() => ExpenseMembers, em => em.user)
+  expenseMembers: ExpenseMembers[];
 
-  @OneToMany(()=>Notifications, notification => notification.user)
-  notifications: Notifications[] //
+  @OneToMany(() => Notification, notification => notification.user)
+  notifications: Notification[];
+
+  @OneToMany(() => Settlement, s => s.paidBy)
+  settlementsMade: Settlement[];
+
+  @OneToMany(() => Settlement, s => s.paidTo)
+  settlementsReceived: Settlement[];
 
   @CreateDateColumn()
   createdAt: Date;
@@ -66,5 +73,4 @@ export class User {
       this.password = await bcrypt.hash(this.password, salt);
     }
   }
-
 }

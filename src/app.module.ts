@@ -14,6 +14,7 @@ import { GroupModule } from './group/group.module';
 import { NotificationModule } from './notification/notification.module';
 import { ExpenseModule } from './expense/expense.module';
 import { CategoryModule } from './category/category.module';
+import { SettlementModule } from './settlement/settlement.module';
 
 
 @Module({
@@ -60,6 +61,7 @@ import { CategoryModule } from './category/category.module';
     NotificationModule,
     ExpenseModule,
     CategoryModule,
+    SettlementModule,
   ],
   controllers: [AppController],
   providers: [AppService],

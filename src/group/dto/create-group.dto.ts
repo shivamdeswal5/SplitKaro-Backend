@@ -8,5 +8,8 @@ export class CreateGroupDto {
   @IsString({ message: 'Group Name Must Be String'})
   @IsNotEmpty()
   name: string;
+
+  @IsString()
+  creatorId?: string;
   
 } 

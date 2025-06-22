@@ -7,9 +7,12 @@ import { ExpenseRepository } from './expense.repository';
 import { DataSource } from 'typeorm';
 import { ExpenseMembers } from './entities/expense-members.entity';
 import { ExpenseMembersRepository } from './expense-members.repository';
+import { UserModule } from '../user/user.module';
+import { GroupModule } from 'src/group/group.module';
+import { CategoryModule } from 'src/category/category.module';
 
 @Module({
- imports:[TypeOrmModule.forFeature([Expense,ExpenseMembers])],
+ imports:[TypeOrmModule.forFeature([Expense,ExpenseMembers]),UserModule,GroupModule,CategoryModule],
       providers: [
          ExpenseService,
          {

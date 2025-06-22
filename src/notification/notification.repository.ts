@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { Notifications } from './entities/notification.entity';
+import { Notification } from './entities/notification.entity';
 
 @Injectable()
-export class NotificationRepository extends Repository<Notifications> {
+export class NotificationRepository extends Repository<Notification> {
   constructor(private readonly dataSource: DataSource) {
-    super(Notifications, dataSource.createEntityManager());
+    super(Notification, dataSource.createEntityManager());
   }
 }

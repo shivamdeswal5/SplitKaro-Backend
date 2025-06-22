@@ -1,4 +1,3 @@
-import { Expense } from 'src/expense/entities/expense.entity';
 import {
   Entity,
   Column,
@@ -7,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Expense } from 'src/expense/entities/expense.entity';
 
 @Entity('categories')
 export class Category {
@@ -14,15 +14,14 @@ export class Category {
   id: string;
 
   @Column()
-  name:string;
+  name: string;
 
-  @OneToMany(()=> Expense, expense=> expense.category)
-  expenses: Expense[]
+  @OneToMany(() => Expense, expense => expense.category)
+  expenses: Expense[];
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-  
 }

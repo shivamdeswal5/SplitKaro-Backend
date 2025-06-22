@@ -1,6 +1,5 @@
 import {
   Entity,
-  Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
@@ -14,16 +13,15 @@ export class GroupMember {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(()=> Group, group => group.members,{cascade:true})
-  group: Group
+  @ManyToOne(() => Group, group => group.members, { onDelete: 'CASCADE' })
+  group: Group;
 
-  @ManyToOne(()=>User, user =>user.groupMember, {cascade:true})
-  user: User
+  @ManyToOne(() => User, user => user.groupMember, { onDelete: 'CASCADE' })
+  user: User;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
 }

@@ -8,9 +8,10 @@ import { DataSource } from 'typeorm';
 import { GroupMemberRepository } from './group-member.repository';
 import { GroupMember } from './entities/group-member.entity';
 import { UserModule } from 'src/user/user.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Group,GroupMember]),UserModule],
+  imports:[TypeOrmModule.forFeature([Group,GroupMember]),UserModule,NotificationModule],
    providers: [
       GroupService,
       {

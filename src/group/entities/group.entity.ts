@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { GroupMember } from './group-member.entity';
 import { Expense } from 'src/expense/entities/expense.entity';
+import { Settlement } from 'src/settlement/entities/settlement.entity';
 
 @Entity('groups')
 export class Group {
@@ -15,18 +16,20 @@ export class Group {
   id: string;
 
   @Column()
-  name: string
+  name: string;
 
-  @OneToMany(()=> GroupMember, member => member.group)
-  members: GroupMember[]
+  @OneToMany(() => GroupMember, member => member.group)
+  members: GroupMember[];
 
-  @OneToMany(()=> Expense, expense => expense.group)
-  expenses: Expense[]
+  @OneToMany(() => Expense, expense => expense.group)
+  expenses: Expense[];
+
+  @OneToMany(() => Settlement, s => s.group)
+  settlements: Settlement[];
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
 }

@@ -1,5 +1,3 @@
-import { Group } from 'src/group/entities/group.entity';
-import { User } from 'src/user/entities/user.entity';
 import {
   Entity,
   Column,
@@ -9,6 +7,8 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
+import { Group } from 'src/group/entities/group.entity';
+import { User } from 'src/user/entities/user.entity';
 import { ExpenseMembers } from './expense-members.entity';
 import { Category } from 'src/category/entities/category.entity';
 
@@ -18,33 +18,35 @@ export class Expense {
   id: string;
 
   @Column()
-  name: string
+  name: string;
 
   @Column()
-  discription: string
+  description: string;
 
-  @Column()
-  amount: string
+  @Column('numeric', { default: 0 })
+  amount: number;
 
-  @Column({nullable:true})
-  reciptUrl : string
+  @Column({ nullable: true })
+  reciptUrl: string;
 
-  @OneToMany(()=>ExpenseMembers,expenseMember => expenseMember.expense)
-  members: ExpenseMembers[]
+  @OneToMany(() => ExpenseMembers, em => em.expense,{
+  cascade: true,
+  eager: true,
+})
+  members: ExpenseMembers[];
 
-  @ManyToOne(()=>Group, group=> group.expenses)
-  group: Group
+  @ManyToOne(() => Group, group => group.expenses)
+  group: Group;
 
-  @ManyToOne(()=>User, user=> user.createdExpenses)
-  createdBy: User
+  @ManyToOne(() => User, user => user.createdExpenses)
+  createdBy: User;
 
-  @ManyToOne(()=>Category, categories => categories.expenses)
-  category: Category
+  @ManyToOne(() => Category, c => c.expenses, { nullable: true, onDelete: 'SET NULL' })
+  category: Category;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
 }
