@@ -4,33 +4,28 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
+
+export type NotificationType = 'group' | 'expense' | 'settlement';
 
 @Entity('notifications')
 export class Notification {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column()
+  message: string;
+
+  @Column({ type: 'enum', enum: ['group', 'expense', 'settlement'] })
+  type: NotificationType;
+
   @ManyToOne(() => User, user => user.notifications, { onDelete: 'CASCADE' })
   user: User;
-
-  @Column()
-  type: 'group' | 'expense' | 'settlement';
-
-  @Column()
-  title: string;
-
-  @Column({ nullable: true })
-  message: string;
 
   @Column({ default: false })
   isRead: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

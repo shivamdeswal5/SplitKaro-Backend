@@ -8,6 +8,7 @@ import { CreateSettlementDto } from './dto/create-settlement.dto';
 import { Settlement } from './entities/settlement.entity';
 import { UserRepository } from 'src/user/user.repository';
 import { GroupRepository } from 'src/group/group.repository';
+import { NotificationRepository } from 'src/notification/notification.repository';
 
 @Injectable()
 export class SettlementService {
@@ -15,6 +16,7 @@ export class SettlementService {
     private readonly settlementRepository: SettlementRepository,
     private readonly userRepository: UserRepository,
     private readonly groupRepository: GroupRepository,
+    private readonly notificationRepository: NotificationRepository,
   ) {}
 
   async createSettlement(dto: CreateSettlementDto): Promise<Settlement> {
@@ -47,7 +49,17 @@ export class SettlementService {
       note,
     });
 
-    return await this.settlementRepository.save(settlement);
+    const savedSettlement = await this.settlementRepository.save(settlement);
+
+    const notification = this.notificationRepository.create({
+      user: paidTo,
+      type: 'settlement',
+      message: `${paidBy} settled ₹${amount} with you in group "${group.name}"`,
+    });
+
+    await this.notificationRepository.save(notification);
+
+    return savedSettlement;
   }
 
   async getSettlementsByGroup(groupId: string): Promise<Settlement[]> {

@@ -12,6 +12,7 @@ import { CreateExpenseDto } from './dto/create-expense.dto';
 import { Expense } from './entities/expense.entity';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { ExpenseMembers } from './entities/expense-members.entity';
+import { NotificationRepository } from 'src/notification/notification.repository';
 
 @Injectable()
 export class ExpenseService {
@@ -21,13 +22,42 @@ export class ExpenseService {
     private readonly userRepository: UserRepository,
     private readonly groupRepository: GroupRepository,
     private readonly categoryRepository: CategoryRepository,
+    private readonly notificationRepository: NotificationRepository,
   ) {}
 
-  async getAllExpenses(): Promise<Expense[]> {
-    return this.expenseRepository.find({
-      relations: ['createdBy', 'group', 'members', 'members.user', 'category'],
-      order: { createdAt: 'DESC' },
-    });
+  async getAllExpenses(
+    page = 1,
+    limit = 10,
+    search?: string,
+  ): Promise<{
+    data: Expense[];
+    total: number;
+    page: number;
+    pageSize: number;
+  }> {
+    const skip = (page - 1) * limit;
+
+    const query = this.expenseRepository
+      .createQueryBuilder('expense')
+      .leftJoinAndSelect('expense.createdBy', 'createdBy')
+      .leftJoinAndSelect('expense.group', 'group')
+      .leftJoinAndSelect('expense.members', 'members')
+      .leftJoinAndSelect('members.user', 'memberUser')
+      .leftJoinAndSelect('expense.category', 'category')
+      .orderBy('expense.createdAt', 'DESC');
+
+    if (search) {
+      query.where('LOWER(expense.name) LIKE :search', {
+        search: `%${search.toLowerCase()}%`,
+      });
+    }
+
+    const [expenses, total] = await query
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return { data: expenses, total, page, pageSize: limit };
   }
 
   async createExpense(dto: CreateExpenseDto): Promise<Expense> {
@@ -74,7 +104,7 @@ export class ExpenseService {
 
     const savedExpense = await this.expenseRepository.save(expense);
 
-    // split Equal or unequal
+    // Save members (split)
     if (splitAmounts && splitAmounts.length > 0) {
       for (const split of splitAmounts) {
         const user = await this.userRepository.findOne({
@@ -91,7 +121,6 @@ export class ExpenseService {
         await this.expenseMembersRepository.save(expenseMember);
       }
     } else {
-      // Equal split
       const splitValue = amount / participantIds.length;
       for (const userId of participantIds) {
         const user = await this.userRepository.findOne({
@@ -109,20 +138,68 @@ export class ExpenseService {
       }
     }
 
+    const notifications: any[] = [];
+    for (const userId of participantIds) {
+      if (userId === createdById) continue;
+
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) continue;
+
+      notifications.push(
+        this.notificationRepository.create({
+          user,
+          type: 'expense',
+          message: `You have been added to expense "${name}" in group "${group.name}"`,
+        }),
+      );
+    }
+
+    if (notifications.length > 0) {
+      await this.notificationRepository.save(notifications);
+    }
+
     return savedExpense;
   }
 
-  async getExpensesByGroup(groupId: string): Promise<Expense[]> {
+  async getExpensesByGroup(
+    groupId: string,
+    page = 1,
+    limit = 10,
+    search?: string,
+  ): Promise<{
+    data: Expense[];
+    total: number;
+    page: number;
+    pageSize: number;
+  }> {
+    const skip = (page - 1) * limit;
+
     const group = await this.groupRepository.findOne({
       where: { id: groupId },
     });
     if (!group) throw new NotFoundException('Group not found');
 
-    return this.expenseRepository.find({
-      where: { group: { id: groupId } },
-      relations: ['createdBy', 'members', 'members.user', 'category'],
-      order: { createdAt: 'DESC' },
-    });
+    const query = this.expenseRepository
+      .createQueryBuilder('expense')
+      .leftJoinAndSelect('expense.createdBy', 'createdBy')
+      .leftJoinAndSelect('expense.members', 'members')
+      .leftJoinAndSelect('members.user', 'memberUser')
+      .leftJoinAndSelect('expense.category', 'category')
+      .where('expense.group.id = :groupId', { groupId })
+      .orderBy('expense.createdAt', 'DESC');
+
+    if (search) {
+      query.andWhere('LOWER(expense.name) LIKE :search', {
+        search: `%${search.toLowerCase()}%`,
+      });
+    }
+
+    const [expenses, total] = await query
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return { data: expenses, total, page, pageSize: limit };
   }
 
   async getExpenseById(expenseId: string): Promise<Expense> {
@@ -232,11 +309,23 @@ export class ExpenseService {
     return { message: 'Expense deleted successfully' };
   }
 
-  async getExpensesByUser(userId: string): Promise<Expense[]> {
+  async getExpensesByUser(
+    userId: string,
+    page = 1,
+    limit = 10,
+    search?: string,
+  ): Promise<{
+    data: Expense[];
+    total: number;
+    page: number;
+    pageSize: number;
+  }> {
+    const skip = (page - 1) * limit;
+
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    const expenses = await this.expenseRepository
+    const query = this.expenseRepository
       .createQueryBuilder('expense')
       .leftJoinAndSelect('expense.members', 'member')
       .leftJoinAndSelect('member.user', 'memberUser')
@@ -244,9 +333,19 @@ export class ExpenseService {
       .leftJoinAndSelect('expense.group', 'group')
       .leftJoinAndSelect('expense.category', 'category')
       .where('member.user.id = :userId', { userId })
-      .orderBy('expense.createdAt', 'DESC')
-      .getMany();
+      .orderBy('expense.createdAt', 'DESC');
 
-    return expenses;
+    if (search) {
+      query.andWhere('LOWER(expense.name) LIKE :search', {
+        search: `%${search.toLowerCase()}%`,
+      });
+    }
+
+    const [expenses, total] = await query
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return { data: expenses, total, page, pageSize: limit };
   }
 }

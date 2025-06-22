@@ -37,34 +37,44 @@ export class GroupService {
 
   async addUserToGroup(dto: AddUserToGroupDto): Promise<GroupMember> {
     const { groupId, userId } = dto;
+
     const group = await this.groupRepository.findOne({
       where: { id: groupId },
     });
     if (!group) {
-      console.log(`Group with groupId: ${groupId} not found ...`);
-      throw new NotFoundException(`Group with id: ${groupId}`);
+      throw new NotFoundException(`Group with id: ${groupId} not found`);
     }
+
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      console.log(`User with Id: ${userId} not found ...`);
-      throw new NotFoundException(`User with Id: ${userId} not found ...`);
+      throw new NotFoundException(`User with id: ${userId} not found`);
     }
+
     const exists = await this.groupMemberRepository.findOne({
       where: {
         group: { id: groupId },
         user: { id: userId },
       },
     });
-    console.log('Existing GroupMembers: ', exists);
     if (exists) {
-      console.log('User Already In Same Group ...');
-      throw new BadRequestException('User Already present In Group');
+      throw new BadRequestException('User already present in group');
     }
+
     const groupMember = this.groupMemberRepository.create({
       user,
       group,
     });
-    return await this.groupMemberRepository.save(groupMember);
+    const savedMember = await this.groupMemberRepository.save(groupMember);
+
+    await this.notificationRepository.save(
+      this.notificationRepository.create({
+        user,
+        type: 'group',
+        message: `You have been added to the group "${group.name}"`,
+      }),
+    );
+
+    return savedMember;
   }
 
   async removeUserFromGroup(
@@ -102,22 +112,54 @@ export class GroupService {
     };
   }
 
-  async getGroupsForUser(userId: string): Promise<Group[]> {
-    console.log('User Id:', userId);
-    const membership = await this.groupMemberRepository.find({
+  async getGroupsForUser(
+    userId: string,
+    page = 1,
+    limit = 10,
+    search?: string,
+  ): Promise<{ data: Group[]; total: number; page: number; pageSize: number }> {
+    const skip = (page - 1) * limit;
+
+    // Get group memberships of the user
+    const memberships = await this.groupMemberRepository.find({
       where: { user: { id: userId } },
-      relations: [
-        'group',
-        'group.members',
-        'group.members.user',
-        'group.expenses',
-        'group.settlements',
-      ],
+      relations: ['group'],
     });
-    console.log('Memberships: ', membership);
-    const groups = membership.map((member) => member.group);
-    console.log('Groups in which user is present: ', groups);
-    return groups;
+
+    // Extract group IDs
+    const groupIds = memberships.map((m) => m.group.id);
+
+    if (groupIds.length === 0) {
+      return { data: [], total: 0, page, pageSize: limit };
+    }
+
+    // Build query
+    const query = this.groupRepository
+      .createQueryBuilder('group')
+      .leftJoinAndSelect('group.members', 'members')
+      .leftJoinAndSelect('members.user', 'user')
+      .leftJoinAndSelect('group.expenses', 'expenses')
+      .leftJoinAndSelect('group.settlements', 'settlements')
+      .where('group.id IN (:...groupIds)', { groupIds });
+
+    if (search) {
+      query.andWhere('LOWER(group.name) LIKE :search', {
+        search: `%${search.toLowerCase()}%`,
+      });
+    }
+
+    const [groups, total] = await query
+      .skip(skip)
+      .take(limit)
+      .orderBy('group.createdAt', 'DESC')
+      .getManyAndCount();
+
+    return {
+      data: groups,
+      total,
+      page,
+      pageSize: limit,
+    };
   }
 
   async updateGroup(groupId: string, dto: UpdateGroupDto): Promise<Group> {
@@ -128,7 +170,7 @@ export class GroupService {
     if (!group) {
       throw new NotFoundException(`Group with ID ${groupId} not found.`);
     }
-    
+
     if (dto.name !== undefined) {
       if (group.name === dto.name) {
         throw new BadRequestException(
@@ -197,7 +239,6 @@ export class GroupService {
         });
       }
     }
-
     return await this.groupRepository.save(group);
   }
 }

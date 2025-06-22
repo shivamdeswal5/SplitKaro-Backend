@@ -7,9 +7,10 @@ import { DataSource } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from 'src/user/user.module';
 import { GroupModule } from 'src/group/group.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Settlement]),UserModule,GroupModule],
+  imports:[TypeOrmModule.forFeature([Settlement]),UserModule,GroupModule,NotificationModule],
        providers: [
           SettlementService,
           {

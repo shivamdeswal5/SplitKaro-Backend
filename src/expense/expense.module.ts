@@ -10,9 +10,10 @@ import { ExpenseMembersRepository } from './expense-members.repository';
 import { UserModule } from '../user/user.module';
 import { GroupModule } from 'src/group/group.module';
 import { CategoryModule } from 'src/category/category.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
- imports:[TypeOrmModule.forFeature([Expense,ExpenseMembers]),UserModule,GroupModule,CategoryModule],
+ imports:[TypeOrmModule.forFeature([Expense,ExpenseMembers]),UserModule,GroupModule,CategoryModule,NotificationModule],
       providers: [
          ExpenseService,
          {
