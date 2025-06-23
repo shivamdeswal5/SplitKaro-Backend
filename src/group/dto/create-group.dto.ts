@@ -10,6 +10,6 @@ export class CreateGroupDto {
   name: string;
 
   @IsString()
-  creatorId?: string;
+  createdBy?: string;
   
 } 

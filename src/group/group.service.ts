@@ -25,7 +25,7 @@ export class GroupService {
   ) {}
 
   async createGroup(dto: CreateGroupDto): Promise<Group> {
-    const group = this.groupRepository.create({ name: dto.name, createdBy: dto.creatorId });
+    const group = this.groupRepository.create({ name: dto.name, createdBy: dto.createdBy });
     return await this.groupRepository.save(group);
   }
 
