@@ -60,6 +60,6 @@ export class GroupController {
 
   @Delete('delete-group/:id')
   deleteGroup(@Param('id') id: string) {
-    return this.deleteGroup(id);
+    return this.groupService.deleteGroup(id);
   }
 }
