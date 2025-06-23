@@ -32,7 +32,13 @@ export class GroupService {
       name: dto.name,
       createdBy: creator,
     });
-    return await this.groupRepository.save(group);
+
+    const result =  await this.groupRepository.save(group);
+    if (!dto.createdBy) {
+      throw new BadRequestException('User Id is required');
+    }
+    await this.addUserToGroup({ groupId: result.id, userId: dto.createdBy });
+    return result;
   }
 
   async getAllGroups(): Promise<Group[]> {

@@ -70,11 +70,11 @@ export class AuthService {
 
             res.cookie('accessToken',accessToken,{
                 httpOnly: true,
-                expires: new Date(new Date().getTime()+ 20 * 60 * 1000)
+                expires: new Date(new Date().getTime()+ 40 * 60 * 1000)
             })
             .cookie("refreshToken",refreshToken,{
                 httpOnly: true,
-                expires: new Date(new Date().getTime() + 40 * 60 * 1000)
+                expires: new Date(new Date().getTime() + 60 * 60 * 1000)
             })
 
             res.send({
