@@ -1,4 +1,6 @@
-import {
+previous group enity now we shsould also add createdBy so that we can track how created this group
+ok in dto i added that and in service i have also done so createrBy we will receive a user id which will save in db
+ {
   Entity,
   Column,
   PrimaryGeneratedColumn,
@@ -18,9 +20,6 @@ export class Group {
   @Column()
   name: string;
 
-  @Column({nullable:true})
-  createdBy: string;
-
   @OneToMany(() => GroupMember, member => member.group)
   members: GroupMember[];
 
@@ -36,3 +35,6 @@ export class Group {
   @UpdateDateColumn()
   updatedAt: Date;
 }
+
+updated crateGroup service
+

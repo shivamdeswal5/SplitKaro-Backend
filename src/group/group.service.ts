@@ -25,7 +25,7 @@ export class GroupService {
   ) {}
 
   async createGroup(dto: CreateGroupDto): Promise<Group> {
-    const group = this.groupRepository.create({ name: dto.name });
+    const group = this.groupRepository.create({ name: dto.name, createdBy: dto.creatorId });
     return await this.groupRepository.save(group);
   }
 
@@ -120,20 +120,17 @@ export class GroupService {
   ): Promise<{ data: Group[]; total: number; page: number; pageSize: number }> {
     const skip = (page - 1) * limit;
 
-    // Get group memberships of the user
     const memberships = await this.groupMemberRepository.find({
       where: { user: { id: userId } },
       relations: ['group'],
     });
 
-    // Extract group IDs
     const groupIds = memberships.map((m) => m.group.id);
 
     if (groupIds.length === 0) {
       return { data: [], total: 0, page, pageSize: limit };
     }
 
-    // Build query
     const query = this.groupRepository
       .createQueryBuilder('group')
       .leftJoinAndSelect('group.members', 'members')

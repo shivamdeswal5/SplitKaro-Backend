@@ -81,8 +81,7 @@ export class AuthService {
                 message: "User Logged In Successfully",
                 accessToken:accessToken,
                 refreshToken: refreshToken,
-                userId: user.id,
-                email: user.email
+                user,
             })
             
         }catch(error){
