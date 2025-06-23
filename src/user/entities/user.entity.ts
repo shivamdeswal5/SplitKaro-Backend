@@ -14,6 +14,7 @@ import { Expense } from 'src/expense/entities/expense.entity';
 import { ExpenseMembers } from 'src/expense/entities/expense-members.entity';
 import { Notification } from 'src/notification/entities/notification.entity';
 import { Settlement } from 'src/settlement/entities/settlement.entity';
+import { Group } from 'src/group/entities/group.entity';
 
 @Entity('users')
 export class User {
@@ -40,6 +41,9 @@ export class User {
 
   @Column({ nullable: true })
   refreshToken: string;
+
+  @OneToMany(()=> Group, group =>group.createdBy)
+  groupsCreated: Group[]
 
   @OneToMany(() => GroupMember, member => member.user)
   groupMember: GroupMember[];

@@ -5,10 +5,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
 } from 'typeorm';
 import { GroupMember } from './group-member.entity';
 import { Expense } from 'src/expense/entities/expense.entity';
 import { Settlement } from 'src/settlement/entities/settlement.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Entity('groups')
 export class Group {
@@ -18,8 +20,8 @@ export class Group {
   @Column()
   name: string;
 
-  @Column({nullable:true})
-  createdBy: string;
+  @ManyToOne(()=>User,user => user.groupsCreated,{eager:true})
+  createdBy:User
 
   @OneToMany(() => GroupMember, member => member.group)
   members: GroupMember[];

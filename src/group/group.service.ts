@@ -25,7 +25,13 @@ export class GroupService {
   ) {}
 
   async createGroup(dto: CreateGroupDto): Promise<Group> {
-    const group = this.groupRepository.create({ name: dto.name, createdBy: dto.createdBy });
+    const creator = await this.userRepository.findOneBy({ id: dto.createdBy });
+    if (!creator) throw new NotFoundException('Creator not found');
+
+    const group = this.groupRepository.create({
+      name: dto.name,
+      createdBy: creator,
+    });
     return await this.groupRepository.save(group);
   }
 
@@ -137,6 +143,7 @@ export class GroupService {
       .leftJoinAndSelect('members.user', 'user')
       .leftJoinAndSelect('group.expenses', 'expenses')
       .leftJoinAndSelect('group.settlements', 'settlements')
+      .leftJoinAndSelect('group.createdBy', 'createdBy')
       .where('group.id IN (:...groupIds)', { groupIds });
 
     if (search) {
@@ -237,5 +244,17 @@ export class GroupService {
       }
     }
     return await this.groupRepository.save(group);
+  }
+
+  async deleteGroup(groupId: string) {
+    const group = await this.groupRepository.findOne({
+      where: { id: groupId },
+    });
+
+    if (!group) {
+      throw new NotFoundException(`Group with id: ${groupId} not found.`);
+    }
+
+    await this.groupRepository.remove(group);
   }
 }

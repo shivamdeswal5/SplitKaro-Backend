@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -55,5 +56,10 @@ export class GroupController {
   @Patch('update-group/:id')
   updateGroup(@Param('id') id: string, @Body() dto: UpdateGroupDto) {
     return this.groupService.updateGroup(id, dto);
+  }
+
+  @Delete('delete-group/:id')
+  deleteGroup(@Param('id') id: string) {
+    return this.deleteGroup(id);
   }
 }
