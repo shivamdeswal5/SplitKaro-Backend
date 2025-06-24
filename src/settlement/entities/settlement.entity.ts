@@ -34,4 +34,5 @@ export class Settlement {
 
   @UpdateDateColumn()
   updatedAt: Date;
+  
 }

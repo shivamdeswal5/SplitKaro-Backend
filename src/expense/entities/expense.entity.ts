@@ -49,4 +49,5 @@ export class Expense {
 
   @UpdateDateColumn()
   updatedAt: Date;
+  
 }

@@ -47,6 +47,13 @@ export class GroupService {
     });
   }
 
+  async getGroupById(id:string){
+    return this.groupRepository.findOne({
+      where:{id:id},
+      relations: ['members', 'members.user', 'expenses', 'settlements']
+    })
+  }
+
   async addUserToGroup(dto: AddUserToGroupDto): Promise<GroupMember> {
     const { groupId, userId } = dto;
 

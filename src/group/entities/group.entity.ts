@@ -26,7 +26,7 @@ export class Group {
   @OneToMany(() => GroupMember, member => member.group)
   members: GroupMember[];
 
-  @OneToMany(() => Expense, expense => expense.group)
+  @OneToMany(() => Expense, expense => expense.group,{onDelete:'CASCADE',onUpdate:'CASCADE'})
   expenses: Expense[];
 
   @OneToMany(() => Settlement, s => s.group)
