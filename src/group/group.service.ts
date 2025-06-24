@@ -43,14 +43,14 @@ export class GroupService {
 
   async getAllGroups(): Promise<Group[]> {
     return this.groupRepository.find({
-      relations: ['members', 'members.user', 'expenses', 'settlements'],
+      relations: ['members', 'members.user', 'expenses', 'settlements','createdBy','expenses.createdBy'],
     });
   }
 
   async getGroupById(id:string){
     return this.groupRepository.findOne({
       where:{id:id},
-      relations: ['members', 'members.user', 'expenses', 'settlements']
+      relations: ['members', 'members.user', 'expenses', 'settlements','createdBy','expenses.createdBy']
     })
   }
 
