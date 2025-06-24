@@ -33,7 +33,7 @@ export class GroupService {
       createdBy: creator,
     });
 
-    const result =  await this.groupRepository.save(group);
+    const result = await this.groupRepository.save(group);
     if (!dto.createdBy) {
       throw new BadRequestException('User Id is required');
     }
@@ -43,15 +43,29 @@ export class GroupService {
 
   async getAllGroups(): Promise<Group[]> {
     return this.groupRepository.find({
-      relations: ['members', 'members.user', 'expenses', 'settlements','createdBy','expenses.createdBy'],
+      relations: [
+        'members',
+        'members.user',
+        'expenses',
+        'settlements',
+        'createdBy',
+        'expenses.createdBy',
+      ],
     });
   }
 
-  async getGroupById(id:string){
+  async getGroupById(id: string) {
     return this.groupRepository.findOne({
-      where:{id:id},
-      relations: ['members', 'members.user', 'expenses', 'settlements','createdBy','expenses.createdBy']
-    })
+      where: { id: id },
+      relations: [
+        'members',
+        'members.user',
+        'expenses',
+        'settlements',
+        'createdBy',
+        'expenses.createdBy',
+      ],
+    });
   }
 
   async addUserToGroup(dto: AddUserToGroupDto): Promise<GroupMember> {
@@ -189,11 +203,9 @@ export class GroupService {
     }
 
     if (dto.name === undefined) {
-        throw new BadRequestException(
-          'Group name undefined',
-        );
-      }
-      group.name = dto.name;
+      throw new BadRequestException('Group name undefined');
+    }
+    group.name = dto.name;
 
     if (dto.addUsersIds && dto.addUsersIds?.length > 0) {
       for (const userId of dto.addUsersIds) {
@@ -218,6 +230,13 @@ export class GroupService {
             user,
           });
           await this.groupMemberRepository.save(groupMember);
+          await this.notificationRepository.save(
+            this.notificationRepository.create({
+              user,
+              type: 'group',
+              message: `Your Group:  "${group.name} has been updated"`,
+            }),
+          );
         } else {
           throw new NotAcceptableException(
             `User with ID ${user.id} is already a member of this group.`,
@@ -252,8 +271,16 @@ export class GroupService {
           user: { id: user.id },
           group: { id: group.id },
         });
+        await this.notificationRepository.save(
+          this.notificationRepository.create({
+            user,
+            type: 'group',
+            message: `You have been removed from group "${group.name}"`,
+          }),
+        );
       }
     }
+
     return await this.groupRepository.save(group);
   }
 

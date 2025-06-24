@@ -259,6 +259,13 @@ export class ExpenseService {
           });
 
           newMembers.push(await this.expenseMembersRepository.save(member));
+          await this.notificationRepository.save(
+            this.notificationRepository.create({
+              user,
+              type: 'expense',
+              message: `Your Expense "${Expense.name} has been updated"`,
+            }),
+          );
         }
       } else if (dto.participantIds && dto.amount) {
         const splitAmount =
@@ -275,6 +282,13 @@ export class ExpenseService {
             expense,
             amount: splitAmount,
           });
+          await this.notificationRepository.save(
+            this.notificationRepository.create({
+              user,
+              type: 'expense',
+              message: `Your Expense "${Expense.name} has been updated"`,
+            }),
+          );
 
           newMembers.push(await this.expenseMembersRepository.save(member));
         }
