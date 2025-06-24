@@ -188,14 +188,12 @@ export class GroupService {
       throw new NotFoundException(`Group with ID ${groupId} not found.`);
     }
 
-    if (dto.name !== undefined) {
-      if (group.name === dto.name) {
+    if (dto.name === undefined) {
         throw new BadRequestException(
-          'New group name is the same as the current one. Please provide a different name.',
+          'Group name undefined',
         );
       }
       group.name = dto.name;
-    }
 
     if (dto.addUsersIds && dto.addUsersIds?.length > 0) {
       for (const userId of dto.addUsersIds) {
