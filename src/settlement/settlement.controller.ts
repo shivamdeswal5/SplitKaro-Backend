@@ -16,6 +16,10 @@ export class SettlementController {
   async getByGroup(@Param('groupId') groupId: string): Promise<Settlement[]> {
     return this.settlementService.getSettlementsByGroup(groupId);
   }
+  @Get('group/:groupId/balances')
+  async getGroupBalances(@Param('groupId') groupId: string) {
+    return this.settlementService.getUserBalancesInGroup(groupId);
+  }
 
   @Get('user/:userId')
   async getByUser(@Param('userId') userId: string): Promise<Settlement[]> {

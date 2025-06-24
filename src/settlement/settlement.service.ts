@@ -9,6 +9,8 @@ import { Settlement } from './entities/settlement.entity';
 import { UserRepository } from 'src/user/user.repository';
 import { GroupRepository } from 'src/group/group.repository';
 import { NotificationRepository } from 'src/notification/notification.repository';
+import { ExpenseMembersRepository } from 'src/expense/expense-members.repository';
+import { ExpenseRepository } from 'src/expense/expense.repository';
 
 @Injectable()
 export class SettlementService {
@@ -17,6 +19,7 @@ export class SettlementService {
     private readonly userRepository: UserRepository,
     private readonly groupRepository: GroupRepository,
     private readonly notificationRepository: NotificationRepository,
+    private readonly expenseRepository: ExpenseRepository,
   ) {}
 
   async createSettlement(dto: CreateSettlementDto): Promise<Settlement> {
@@ -98,5 +101,63 @@ export class SettlementService {
       relations: ['paidBy', 'paidTo', 'group'],
       order: { createdAt: 'DESC' },
     });
+  }
+
+  async getUserBalancesInGroup(
+    groupId: string,
+  ): Promise<Record<string, number>> {
+    const group = await this.groupRepository.findOne({
+      where: { id: groupId },
+    });
+    if (!group) throw new NotFoundException('Group not found');
+
+    const expenses = await this.expenseRepository.find({
+      where: { group: { id: groupId } },
+      relations: ['members', 'members.user', 'createdBy'],
+    });
+
+    const settlements = await this.settlementRepository.find({
+      where: { group: { id: groupId } },
+      relations: ['paidBy', 'paidTo'],
+    });
+
+    const balances: Record<string, number> = {};
+
+    for (const expense of expenses) {
+      const paidById = expense.createdBy?.id;
+      if (!paidById) continue;
+
+      if (!balances[paidById]) balances[paidById] = 0;
+
+      for (const member of expense.members) {
+        const userId = member.user?.id;
+        const amount = Number(member.amount);
+
+        // Validate amount
+        if (!userId || isNaN(amount)) continue;
+
+        if (!balances[userId]) balances[userId] = 0;
+
+        if (userId !== paidById) {
+          balances[userId] -= amount;
+          balances[paidById] += amount;
+        }
+      }
+    }
+
+    for (const settlement of settlements) {
+      const { paidBy, paidTo, amount } = settlement;
+      const amt = Number(amount);
+
+      if (!paidBy?.id || !paidTo?.id || isNaN(amt)) continue;
+
+      if (!balances[paidBy.id]) balances[paidBy.id] = 0;
+      if (!balances[paidTo.id]) balances[paidTo.id] = 0;
+
+      balances[paidBy.id] -= amt;
+      balances[paidTo.id] += amt;
+    }
+
+    return balances;
   }
 }

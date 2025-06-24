@@ -8,9 +8,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from 'src/user/user.module';
 import { GroupModule } from 'src/group/group.module';
 import { NotificationModule } from 'src/notification/notification.module';
+import { ExpenseModule } from 'src/expense/expense.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Settlement]),UserModule,GroupModule,NotificationModule],
+  imports:[TypeOrmModule.forFeature([Settlement]),UserModule,GroupModule,NotificationModule,ExpenseModule],
        providers: [
           SettlementService,
           {

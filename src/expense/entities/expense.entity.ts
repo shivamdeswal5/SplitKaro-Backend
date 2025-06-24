@@ -35,7 +35,7 @@ export class Expense {
 })
   members: ExpenseMembers[];
 
-  @ManyToOne(() => Group, group => group.expenses)
+  @ManyToOne(() => Group, group => group.expenses,{onDelete:'CASCADE'})
   group: Group;
 
   @ManyToOne(() => User, user => user.createdExpenses)
