@@ -138,24 +138,17 @@ export class ExpenseService {
       }
     }
 
-    const notifications: any[] = [];
     for (const userId of participantIds) {
       if (userId === createdById) continue;
 
       const user = await this.userRepository.findOne({ where: { id: userId } });
       if (!user) continue;
 
-      notifications.push(
-        this.notificationRepository.create({
-          user,
-          type: 'expense',
-          message: `You have been added to expense "${name}" in group "${group.name}"`,
-        }),
-      );
-    }
-
-    if (notifications.length > 0) {
-      await this.notificationRepository.save(notifications);
+      this.notificationRepository.create({
+        user,
+        type: 'expense',
+        message: `You have been added to expense "${name}" in group "${group.name}"`,
+      });
     }
 
     return savedExpense;
