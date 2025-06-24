@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
@@ -19,7 +20,11 @@ export class NotificationController {
   }
 
   @Get('user/:userId')
-  getUserNotifications(@Param('userId') userId: string) {
+  getUserNotifications(
+    @Param('userId') userId: string,
+    @Query('skip') skip = 0,
+    @Query('take') take = 5,
+  ) {
     return this.notificationService.getNotificationsForUser(userId);
   }
 
