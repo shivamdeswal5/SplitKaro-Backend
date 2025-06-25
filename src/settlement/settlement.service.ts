@@ -9,7 +9,6 @@ import { Settlement } from './entities/settlement.entity';
 import { UserRepository } from 'src/user/user.repository';
 import { GroupRepository } from 'src/group/group.repository';
 import { NotificationRepository } from 'src/notification/notification.repository';
-import { ExpenseMembersRepository } from 'src/expense/expense-members.repository';
 import { ExpenseRepository } from 'src/expense/expense.repository';
 
 @Injectable()
